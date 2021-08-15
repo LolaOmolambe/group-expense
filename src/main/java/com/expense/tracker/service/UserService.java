@@ -21,8 +21,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -88,7 +90,6 @@ public class UserService implements IUserService{
         userRepository.save(user);
 
         return user;
-        //return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
     @Override
@@ -110,11 +111,19 @@ public class UserService implements IUserService{
                 userDetails.getLastName(),
                 userDetails.getEmail(),
                 roles);
-
-//        return ResponseEntity.ok(new JwtResponse(jwt,
-//                userDetails.getId(),
-//                userDetails.getUsername(),
-//                userDetails.getEmail(),
-//                roles));
     }
+
+    @Override
+    public User getUser(Principal principal) throws ResourceNotFoundException{
+        String loggedInUser = jwtUtils.getAuthDetails();
+         Optional<User> user = this.userRepository.findByEmail(loggedInUser);
+
+        if (!user.isPresent()) {
+            throw new ResourceNotFoundException("Invalid user.");
+        } else {
+            return user.get();
+        }
+    }
+
+
 }

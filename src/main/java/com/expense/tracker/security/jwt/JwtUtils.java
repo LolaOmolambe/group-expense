@@ -1,11 +1,11 @@
 package com.expense.tracker.security.jwt;
 
+import com.expense.tracker.exception.AuthException;
 import com.expense.tracker.security.services.UserDetailsImpl;
-import com.expense.tracker.service.IGroupService;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -40,9 +40,13 @@ public class JwtUtils {
                 .getBody().getSubject();
     }
 
-    public boolean validateJwtToken (String authToken) {
+    public boolean validateJwtToken (String authToken) throws AuthException {
+        System.out.println("here " + authToken);
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+            System.out.println("here " + jwtSecret);
+
+            Object y = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+            System.out.println("herehhh " + y);
             return true;
         } catch (SignatureException e) {
             logger.log(Level.SEVERE,"Invalid JWT signature ", e.getMessage());
@@ -50,6 +54,7 @@ public class JwtUtils {
             logger.log(Level.SEVERE,"Invalid JWT token ", e.getMessage());
         } catch (ExpiredJwtException e) {
             logger.log(Level.SEVERE,"JWT token is expired", e.getMessage());
+            throw new AuthException("JWT token is expired");
         } catch (UnsupportedJwtException e) {
             logger.log(Level.SEVERE,"JWT token is unsupported", e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -57,4 +62,10 @@ public class JwtUtils {
         }
         return false;
     }
+
+    public String getAuthDetails() {
+        Object authenticationObject = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ((UserDetailsImpl) authenticationObject).getEmail();
+    }
+
 }

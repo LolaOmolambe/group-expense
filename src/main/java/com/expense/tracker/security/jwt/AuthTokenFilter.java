@@ -1,5 +1,6 @@
 package com.expense.tracker.security.jwt;
 
+import com.expense.tracker.exception.AuthException;
 import com.expense.tracker.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +20,7 @@ import java.util.logging.Logger;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
 
+    @Autowired
     private JwtUtils jwtUtils;
 
     @Autowired
@@ -43,7 +45,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        } catch(Exception e) {
+        }
+        catch(AuthException e) {
+
+            logger.log(Level.SEVERE, "Cannot set user authentication: ", e.getMessage());
+            throw new AuthException("JWT token is expired");
+        }
+        catch(Exception e) {
             logger.log(Level.SEVERE, "Cannot set user authentication: ", e.getMessage());
         }
 

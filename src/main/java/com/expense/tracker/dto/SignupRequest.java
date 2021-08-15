@@ -1,64 +1,41 @@
 package com.expense.tracker.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.validation.constraints.*;
 import java.util.Set;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
 public class SignupRequest {
-    @NotBlank
+    @NotBlank(message = "Please provide first name")
     @Size(min = 3, max = 20)
     private String firstName;
 
-    @NotBlank
+    @NotBlank(message = "Please provide last name")
     @Size(min = 3, max = 20)
     private String lastName;
 
-    @NotBlank
+    @NotBlank(message = "Please provide valid email")
     @Email
     private String email;
 
     private Set<String> role;
 
-    @NotBlank
+    @NotBlank(message = "Please provide password")
     @Size(min = 6, max = 40)
     private String password;
 
-    public String getFirstName() {
-        return firstName;
-    }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
 
-    public String getLastName() {
-        return lastName;
-    }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
 
-    public String getEmail() {
-        return email;
-    }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
-    public Set<String> getRole() {
-        return role;
-    }
 
-    public void setRole(Set<String> role) {
-        this.role = role;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

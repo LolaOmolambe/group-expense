@@ -1,5 +1,7 @@
 package com.expense.tracker.security.services;
 
+import com.expense.tracker.entity.Authority;
+import com.expense.tracker.entity.Role;
 import com.expense.tracker.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -36,10 +39,21 @@ public class UserDetailsImpl implements UserDetails {
         this.authorities = authorities;
     }
     public static UserDetailsImpl build(User user) {
+        Collection<Authority> authorityEntities = new HashSet<>();
+
         List<GrantedAuthority> authorities = user.getRoles()
                 .stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+                .map(role -> {
+                    //new SimpleGrantedAuthority(role.getName().name());
+                    authorityEntities.addAll(role.getAuthorities());
+                    return new SimpleGrantedAuthority(role.getName().name());
+                })
                 .collect(Collectors.toList());
+
+
+        authorityEntities.forEach((authorityEntity) ->{
+            authorities.add(new SimpleGrantedAuthority(authorityEntity.getName()));
+        });
 
         return new UserDetailsImpl(user.getId(),
                 user.getFirstName(),
@@ -52,6 +66,7 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
+
     }
 
     public Long getId() {

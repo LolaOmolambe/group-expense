@@ -1,5 +1,6 @@
 package com.expense.tracker.security.jwt;
 
+import com.expense.tracker.exception.AuthException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,11 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
     private static final Logger logger = Logger.getLogger(AuthEntryPointJwt.class.getName());
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException, AuthException {
         logger.log(Level.SEVERE, "Unauthorized error ", e.getMessage());
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error : Unauthorized");
+        //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error : Unauthorized");
+        throw new AuthException("User not authenticated.");
+
+
     }
 }

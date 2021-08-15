@@ -1,9 +1,10 @@
 package com.expense.tracker.repository;
 
-import com.expense.tracker.entity.Category;
+import com.expense.tracker.entity.Authority;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Long> {
+public interface AuthorityRepository extends JpaRepository<Authority, Long> {
+    Authority findByName(String name);
 }
