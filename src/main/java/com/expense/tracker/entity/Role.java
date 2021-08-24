@@ -2,10 +2,9 @@ package com.expense.tracker.entity;
 
 import com.expense.tracker.enums.RoleType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.Entity;
 import javax.persistence.*;
@@ -17,8 +16,13 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "roles")
-public class Role {
+@SQLDelete(sql = "UPDATE roles SET deleted=true WHERE role_id=?")
+@Where(clause = "deleted = false")
+public class Role extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
@@ -38,17 +42,7 @@ public class Role {
     @ManyToMany(mappedBy = "roles")
     private Collection<User> users;
 
-    public Role() {
-    }
-
-    public Role(RoleType name) {
-        this.name = name;
-    }
-
-    public Role(Long id, RoleType name) {
-        Id = id;
-        this.name = name;
-    }
-
+    @Builder.Default
+    private Boolean deleted = false;
 
 }
