@@ -50,7 +50,6 @@ public class UserDetailsImpl implements UserDetails {
                 })
                 .collect(Collectors.toList());
 
-
         authorityEntities.forEach((authorityEntity) ->{
             authorities.add(new SimpleGrantedAuthority(authorityEntity.getName()));
         });

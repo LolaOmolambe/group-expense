@@ -1,7 +1,10 @@
 package com.expense.tracker.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -15,7 +18,9 @@ import java.util.Set;
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "email")
 })
-public class User {
+@SQLDelete(sql = "UPDATE users SET deleted=true WHERE user_id=?")
+@Where(clause = "deleted = false")
+public class User extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -46,6 +51,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<TeamUser> teamUsers;
+
+    @Builder.Default
+    private Boolean deleted = false;
 
 
     public User() {
