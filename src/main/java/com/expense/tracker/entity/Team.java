@@ -1,10 +1,9 @@
 package com.expense.tracker.entity;
 
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
@@ -15,9 +14,13 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "teams")
-public class Team {
+@SQLDelete(sql = "UPDATE teams SET deleted=true WHERE team_id=?")
+@Where(clause = "deleted = false")
+public class Team extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "team_id")
@@ -37,6 +40,10 @@ public class Team {
     private Set<TeamUser> teamUsers = new HashSet<>();
 
     @NonNull
-    private boolean active;
+    private Boolean active;
+
+    @Builder.Default
+    @Column(name = "deleted")
+    private Boolean deleted = false;
 
 }

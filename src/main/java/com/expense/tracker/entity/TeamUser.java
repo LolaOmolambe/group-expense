@@ -1,20 +1,23 @@
 package com.expense.tracker.entity;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.stereotype.Service;
+import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "team_user")
-public class TeamUser {
+@SQLDelete(sql = "UPDATE team_user SET deleted=true WHERE id=?")
+@Where(clause = "deleted = false")
+public class TeamUser extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -31,11 +34,12 @@ public class TeamUser {
 
     private Boolean isAdmin = false;
 
-    public TeamUser(User user, Team team, Boolean isAdmin) {
-        this.user = user;
-        this.team = team;
-        this.isAdmin = isAdmin;
-    }
+    @Builder.Default
+    private Boolean deleted = false;
+
+    @OneToMany(mappedBy = "teamUser")
+    private List<StandupUpdate> standupUpdates;
+
 
     @Override
     public boolean equals(Object o) {
