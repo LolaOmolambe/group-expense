@@ -40,13 +40,16 @@ public class JwtUtils {
                 .getBody().getSubject();
     }
 
+    public Date getExpirationFromJwtToken(String token) {
+        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token)
+                .getBody().getExpiration();
+    }
+
     public boolean validateJwtToken (String authToken) throws AuthException {
         System.out.println("here " + authToken);
         try {
-            System.out.println("here " + jwtSecret);
-
             Object y = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
-            System.out.println("herehhh " + y);
+
             return true;
         } catch (SignatureException e) {
             logger.log(Level.SEVERE,"Invalid JWT signature ", e.getMessage());

@@ -2,21 +2,24 @@ package com.expense.tracker.entity;
 
 import com.expense.tracker.enums.RoleType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 @Getter
 @Setter
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "authorities")
-public class Authority {
+@SQLDelete(sql = "UPDATE authorities SET deleted=true WHERE authority_id=?")
+@Where(clause = "deleted = false")
+public class Authority extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "authority_id")
@@ -30,12 +33,6 @@ public class Authority {
     @ManyToMany(mappedBy = "authorities")
     private Set<Role> roles;
 
-
-    public Authority() {
-    }
-
-    public Authority(String name) {
-        this.name = name;
-    }
-
+    @Builder.Default
+    private Boolean deleted = false;
 }

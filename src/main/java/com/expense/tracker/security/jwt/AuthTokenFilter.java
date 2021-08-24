@@ -30,7 +30,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain) throws ServletException, IOException, AuthException {
         try{
             String jwt = parseJwt(request);
 
@@ -47,7 +47,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             }
         }
         catch(AuthException e) {
-
             logger.log(Level.SEVERE, "Cannot set user authentication: ", e.getMessage());
             throw new AuthException("JWT token is expired");
         }
