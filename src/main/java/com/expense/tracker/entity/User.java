@@ -1,8 +1,6 @@
 package com.expense.tracker.entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -15,6 +13,9 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "email")
 })
@@ -39,8 +40,14 @@ public class User extends BaseEntity{
     private String email;
 
     @NotEmpty
-    @Column(name = "password_encrypted")
+    @Column(name = "password_encrypted", nullable = false)
     private String password;
+
+    private String emailVerificationToken;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean emailVerificationStatus = false;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable( name = "user_roles",
@@ -54,15 +61,4 @@ public class User extends BaseEntity{
 
     @Builder.Default
     private Boolean deleted = false;
-
-
-    public User() {
-    }
-
-    public User(String firstName, String lastName, String email, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-    }
 }

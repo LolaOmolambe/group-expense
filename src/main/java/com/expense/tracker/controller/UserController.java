@@ -1,9 +1,6 @@
 package com.expense.tracker.controller;
 
-import com.expense.tracker.dto.JwtResponse;
-import com.expense.tracker.dto.LoginRequest;
-import com.expense.tracker.dto.SignupRequest;
-import com.expense.tracker.dto.UserDTO;
+import com.expense.tracker.dto.*;
 import com.expense.tracker.entity.User;
 import com.expense.tracker.exception.AuthException;
 import com.expense.tracker.exception.DuplicateEntityException;
@@ -14,25 +11,39 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.List;
+import java.util.Set;
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping(path = "/api/v1/auth")
+@RequestMapping(path = "/api/v1/user")
 public class UserController {
     @Autowired
     private IUserService userService;
 
-
-    @PostMapping(path = "/signup")
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public UserDTO registerUser(@Validated @RequestBody SignupRequest signupRequest) throws DuplicateEntityException, Exception {
-        return userService.registerUser(signupRequest);
+    @GetMapping(path = "/team" )
+    public Set<CreateTeamDTO> getTeamsBelongingToUser(Principal principal) throws ResourceNotFoundException {
+        return userService.getTeamsForUser(principal);
     }
 
-    @PostMapping(path = "/login")
-    @ResponseStatus(code = HttpStatus.OK)
-    public JwtResponse loginUser(@Validated @RequestBody LoginRequest loginRequest) throws AuthException {
-        return userService.loginUser(loginRequest);
+    //TODO: ONLY FOR ADMIN and logged in user
+    @GetMapping(path = "/{id}")
+    public UserDTO getUser(@PathVariable Long id) {
+        return userService.getUserById(id);
     }
+
+    @PutMapping(path = "/update")
+    public UserDTO  updateUser(Principal principal, @RequestBody UserDTO userDTO){
+        return userService.updateUser(principal, userDTO);
+    }
+
+    @GetMapping()
+    public List<UserDTO> getUsers(@RequestParam(value = "page", defaultValue = "0")int page,
+                                  @RequestParam(value = "size", defaultValue = "10") int size){
+        return userService.getUsers(page,size);
+    }
+
 
 
 }
