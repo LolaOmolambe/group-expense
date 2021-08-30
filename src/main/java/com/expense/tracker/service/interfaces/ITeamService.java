@@ -1,4 +1,4 @@
-package com.expense.tracker.service;
+package com.expense.tracker.service.interfaces;
 
 import com.expense.tracker.dto.CreateTeamDTO;
 import com.expense.tracker.entity.TeamUser;

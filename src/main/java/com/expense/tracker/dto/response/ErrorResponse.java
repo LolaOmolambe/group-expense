@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Scope;
 import java.io.Serializable;
 import java.util.Date;
 
-@Getter
-@Setter
+
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ErrorResponse  {
@@ -16,8 +16,5 @@ public class ErrorResponse  {
     private Date timestamp;
     private String message;
     private String description;
-
-
-
 
 }

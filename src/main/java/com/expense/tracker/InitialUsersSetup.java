@@ -63,7 +63,8 @@ public class InitialUsersSetup {
     private Authority createAuthority(String name) {
         Authority authority = authorityRepository.findByName(name);
         if (authority == null) {
-            authority = new Authority(name);
+            //authority = new Authority(name);
+            authority = Authority.builder().name(name).build();
             authorityRepository.save(authority);
         }
         return authority;
@@ -77,7 +78,8 @@ public class InitialUsersSetup {
 
         if(role.isPresent()) return role.get();
 
-        Role newrole = new Role(name);
+        //Role newrole = new Role(name);
+        Role newrole = Role.builder().name(name).build();
         if (!role.isPresent()) {
 
             newrole.setAuthorities(authorities);

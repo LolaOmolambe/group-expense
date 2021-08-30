@@ -35,7 +35,7 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
     @ExceptionHandler(value = {ResourceNotFoundException.class})
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public ResponseEntity<Object> resourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
-        Response response = new Response(false);
+
         ErrorResponse message = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 new Date(),
@@ -43,7 +43,8 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
                 request.getDescription(false)
         );
         List<ErrorResponse> listofErrors = Arrays.asList(message);
-        response.setErrors(listofErrors);
+
+        Response response = Response.builder().success(false).errors(listofErrors).build();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -54,7 +55,7 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
     @ExceptionHandler(value = {AuthException.class})
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     public ResponseEntity<Object> authException(AuthException ex, WebRequest request) {
-        Response response = new Response(false);
+
         ErrorResponse message = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
                 new Date(),
@@ -62,7 +63,8 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
                 request.getDescription(false)
         );
         List<ErrorResponse> listofErrors = Arrays.asList(message);
-        response.setErrors(listofErrors);
+
+        Response response = Response.builder().success(false).errors(listofErrors).build();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -73,7 +75,7 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
     @ExceptionHandler(value = {DuplicateEntityException.class})
     @ResponseStatus(value = HttpStatus.CONFLICT)
     public ResponseEntity<Object> duplicateException(DuplicateEntityException ex, WebRequest request) {
-        Response response = new Response(false);
+
         ErrorResponse message = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 new Date(),
@@ -81,7 +83,8 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
                 request.getDescription(false)
         );
         List<ErrorResponse> listofErrors = Arrays.asList(message);
-        response.setErrors(listofErrors);
+
+        Response response = Response.builder().success(false).errors(listofErrors).build();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -91,7 +94,7 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
 
     @ExceptionHandler({AccessDeniedException.class})
     public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex, WebRequest request) {
-        Response response = new Response(false);
+
         ErrorResponse message = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
                 new Date(),
@@ -99,7 +102,8 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
                 request.getDescription(false)
         );
         List<ErrorResponse> listofErrors = Arrays.asList(message);
-        response.setErrors(listofErrors);
+
+        Response response = Response.builder().success(false).errors(listofErrors).build();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -107,9 +111,9 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
     }
 
     @ExceptionHandler(Exception.class)
-    //@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Object> globalExceptionHandler(Exception ex, WebRequest request) {
-        Response response = new Response(false);
+
         ErrorResponse message = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 new Date(),
@@ -117,7 +121,8 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
                 request.getDescription(false)
         );
         List<ErrorResponse> listofErrors = Arrays.asList(message);
-        response.setErrors(listofErrors);
+
+        Response response = Response.builder().success(false).errors(listofErrors).build();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -144,9 +149,7 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
             return o;
         }
         else {
-            return new Response(true, o);
+            return Response.builder().success(true).result(o).build();
         }
-        //Response<Object> response = new Response<>("success",o );
-        //return new ResponseEntity(response, HttpStatus.OK);
     }
 }
