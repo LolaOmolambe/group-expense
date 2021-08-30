@@ -1,31 +1,24 @@
 package com.expense.tracker.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Response<T> {
-    private String status;
-    //private String message;
-    private ErrorResponse errors;
-    private T data;
+public class Response {
 
-    public Response(String status, T data) {
-        this.status = status;
-        //this.message = message;
-        this.data = data;
-    }
+    private boolean success;
+    private Object result;
 
-    public Response(String status, ErrorResponse data) {
-        this.status = status;
-        this.errors = data;
-    }
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Builder.Default
+    private List<ErrorResponse> errors = new ArrayList();
 
 }

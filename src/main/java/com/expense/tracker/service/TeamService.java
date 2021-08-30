@@ -92,9 +92,6 @@ public class TeamService implements ITeamService {
 
         ModelMapper modelMapper = new ModelMapper();
 
-        team.getTeamUsers();
-
-
         Set<UserDTO> users = team.getTeamUsers()
                 .stream()
                 .map(teamUser -> {
@@ -111,64 +108,61 @@ public class TeamService implements ITeamService {
 
     @Override
     public Set<TeamUser> addUserToTeam(Long teamId, Long userId, Principal principal) throws ResourceNotFoundException, AuthException, DuplicateEntityException {
+        try{
+            Optional<Team> team = teamRepository.findById(teamId);
 
-        Optional<Team> team = teamRepository.findById(teamId);
+            if (!team.isPresent()) {
+                throw new ResourceNotFoundException("Team does not exist.");
+            }
 
-        if (!team.isPresent()) {
-            throw new ResourceNotFoundException("Team does not exist.");
+            Optional<User> newMember = userRepository.findById(userId);
+
+            if (!newMember.isPresent()) {
+                throw new ResourceNotFoundException("User does not exist");
+            }
+
+            //Get the logged in user
+            User loggedInUser = userService.getUser(principal);
+
+            if (loggedInUser == null) {
+                throw new AuthException("Unable to retrieve profile of logged in user.");
+            }
+
+            //Check if logged in user is in team
+            TeamUser teamUser = teamUserRepository.findByTeamAndUser(teamId, loggedInUser.getId());
+
+            if (teamUser == null) {
+                throw new ResourceNotFoundException("You are not part of this team. You can not add another member");
+            }
+
+            //Check if user is an admin
+            if (!teamUser.getIsAdmin()) {
+                throw new AuthException("Only An Admin of this team can add users");
+            }
+
+            Set<TeamUser> memberDetails = newMember.get().getTeamUsers();
+
+            List<TeamUser> memberTeams = newMember.get().getTeamUsers()
+                    .stream()
+                    .filter(element -> {
+                        return element.getTeam().getId() == team.get().getId();
+                    })
+                    .collect(Collectors.toList());
+
+            if (memberTeams.size() > 0) {
+                throw new DuplicateEntityException("User already in team");
+            }
+
+            TeamUser newTeamUser = TeamUser.builder().user(newMember.get()).team(team.get()).isAdmin(false).build();
+            teamUserRepository.save(newTeamUser);
+
+            return memberDetails;
+
+        } catch(AuthException ex){
+            throw new AuthException(ex.getMessage());
         }
 
-        //Check if new memeber exists
-        Optional<User> newMember = userRepository.findById(userId);
-
-        if (!newMember.isPresent()) {
-            throw new ResourceNotFoundException("User does not exist");
-        }
-
-
-        //Get the logged in user
-        User user = userService.getUser(principal);
-
-        if (user == null) {
-            throw new AuthException("\"Unable to retrieve profile of logged in user.");
-        }
-
-        //Check if logged in user is in team
-        TeamUser teamUser = teamUserRepository.findByTeamAndUser(teamId, user.getId());
-
-        if (teamUser == null) {
-            throw new ResourceNotFoundException("You are not part of this team.");
-        }
-
-        //Check if user is an admin
-        if (!teamUser.getIsAdmin()) {
-            throw new AuthException("Only An Admin of this team can add users");
-        }
-
-
-        Set<TeamUser> memberDetails = newMember.get().getTeamUsers();
-
-        //Check if user is not already in team
-
-        List<TeamUser> memberTeams = newMember.get().getTeamUsers()
-                .stream()
-                .filter(element -> {
-                    return element.getTeam().getId() == team.get().getId();
-                })
-                .collect(Collectors.toList());
-
-        if (memberTeams.size() > 0) {
-            throw new DuplicateEntityException("User already in team");
-        }
-
-        //TeamUser newTeamUser = new TeamUser(newMember.get(), team.get(), false);
-        TeamUser newTeamUser = TeamUser.builder().user(newMember.get()).team(team.get()).isAdmin(false).build();
-        teamUserRepository.save(newTeamUser);
-
-
-        return memberDetails;
     }
-
 
     @Override
     public void removeUserFromTeam(Long teamId, Long userId) {

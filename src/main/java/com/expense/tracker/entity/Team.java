@@ -27,7 +27,7 @@ public class Team extends BaseEntity{
     private Long Id;
 
     @NotEmpty
-    @Column(name = "team_name")
+    @Column(name = "team_name", length = 120, nullable = false)
     private String name;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -39,7 +39,7 @@ public class Team extends BaseEntity{
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     private Set<TeamUser> teamUsers = new HashSet<>();
 
-    @NonNull
+
     private Boolean active;
 
     @Builder.Default

@@ -1,4 +1,4 @@
-package com.expense.tracker.dto;
+package com.expense.tracker.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @ToString
-public class SignupRequest {
+public class SignupRequestModel {
     @NotBlank(message = "Please provide first name")
     @Size(min = 3, max = 20)
     private String firstName;

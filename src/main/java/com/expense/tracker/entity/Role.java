@@ -29,7 +29,7 @@ public class Role extends BaseEntity{
     public Long Id;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20, name = "role_name")
+    @Column(length = 20, name = "role_name", nullable = false)
     private RoleType name;
 
     @ManyToMany(fetch = FetchType.LAZY)
