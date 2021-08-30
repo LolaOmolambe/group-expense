@@ -35,6 +35,15 @@ public class JwtUtils {
                 .compact();
     }
 
+    public String generateEmailVerificationToken(String userId) {
+        String token = Jwts.builder()
+                .setSubject(userId)
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
+        return token;
+    }
+
     public String getEmailFromJwtToken(String token) {
         return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token)
                 .getBody().getSubject();
@@ -45,25 +54,39 @@ public class JwtUtils {
                 .getBody().getExpiration();
     }
 
-    public boolean validateJwtToken (String authToken) throws AuthException {
-        System.out.println("here " + authToken);
+    public boolean validateJwtToken(String authToken) throws AuthException {
+
         try {
             Object y = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
 
             return true;
         } catch (SignatureException e) {
-            logger.log(Level.SEVERE,"Invalid JWT signature ", e.getMessage());
+            logger.log(Level.SEVERE, "Invalid JWT signature ", e.getMessage());
         } catch (MalformedJwtException e) {
-            logger.log(Level.SEVERE,"Invalid JWT token ", e.getMessage());
+            logger.log(Level.SEVERE, "Invalid JWT token ", e.getMessage());
         } catch (ExpiredJwtException e) {
-            logger.log(Level.SEVERE,"JWT token is expired", e.getMessage());
+            logger.log(Level.SEVERE, "JWT token is expired", e.getMessage());
             throw new AuthException("JWT token is expired");
         } catch (UnsupportedJwtException e) {
-            logger.log(Level.SEVERE,"JWT token is unsupported", e.getMessage());
+            logger.log(Level.SEVERE, "JWT token is unsupported", e.getMessage());
         } catch (IllegalArgumentException e) {
-            logger.log(Level.SEVERE,"JWT claims string is empty", e.getMessage());
+            logger.log(Level.SEVERE, "JWT claims string is empty", e.getMessage());
         }
         return false;
+    }
+
+    public boolean hasTokenExpired(String token) {
+
+        boolean returnValue = false;
+        try {
+            Date tokenExpirationDate = getExpirationFromJwtToken(token);
+            Date todayDate = new Date();
+            returnValue = tokenExpirationDate.before(todayDate);
+        } catch (ExpiredJwtException ex) {
+            returnValue = true;
+        }
+
+        return returnValue;
     }
 
     public String getAuthDetails() {
