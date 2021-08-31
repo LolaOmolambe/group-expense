@@ -11,8 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -45,7 +44,7 @@ public class User extends BaseEntity{
 
     private String emailVerificationToken;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "email_verification_status")
     @Builder.Default
     private Boolean emailVerificationStatus = false;
 

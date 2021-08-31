@@ -121,9 +121,15 @@ public class UserService implements IUserService {
     public JwtResponse loginUser(LoginRequest loginRequest) throws AuthException {
 
         logger.log(Level.INFO, "Logging User in");
+        Authentication authentication = null;
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        try{
+             authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        } catch(AuthenticationException ex){
+            logger.log(Level.SEVERE, "Authentication failed: no credentials provided");
+            throw new AuthException("Invalid Credentials");
+        }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -19,12 +21,10 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import java.nio.file.AccessDeniedException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 @RestControllerAdvice
@@ -92,6 +92,33 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
     }
 
 
+    @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, WebRequest request) {
+        List<String> errors = ex.getBindingResult().getAllErrors().stream()
+                .map(error -> {
+                    //String fieldname = ((FieldError) error).getField();
+                    String errorMessage = error.getDefaultMessage();
+                    return errorMessage;
+                })
+                .collect(Collectors.toList());
+
+        ErrorResponse message = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                new Date(),
+                //"Validation Error",
+               errors.toString(),
+                request.getDescription(true)
+        );
+        List<ErrorResponse> listofErrors = Arrays.asList(message);
+
+        Response response = Response.builder().success(false).errors(listofErrors).build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler({AccessDeniedException.class})
     public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex, WebRequest request) {
 
@@ -109,6 +136,7 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity(response, HttpStatus.UNAUTHORIZED);
     }
+
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
