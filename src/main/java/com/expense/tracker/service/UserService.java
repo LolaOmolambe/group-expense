@@ -1,6 +1,9 @@
 package com.expense.tracker.service;
 
-import com.expense.tracker.dto.*;
+import com.expense.tracker.dto.CreateTeamDTO;
+import com.expense.tracker.dto.JwtResponse;
+import com.expense.tracker.dto.LoginRequest;
+import com.expense.tracker.dto.UserDTO;
 import com.expense.tracker.dto.request.SignupRequestModel;
 import com.expense.tracker.entity.Role;
 import com.expense.tracker.entity.User;
@@ -35,25 +38,19 @@ import java.util.stream.Collectors;
 @Service
 public class UserService implements IUserService {
 
+    private static final Logger logger = Logger.getLogger(UserService.class.getName());
     @Autowired
     private AuthenticationManager authenticationManager;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private RoleRepository roleRepository;
-
     @Autowired
     private TeamUserRepository teamUserRepository;
-
     @Autowired
     private PasswordEncoder encoder;
-
     @Autowired
     private JwtUtils jwtUtils;
-
-    private static final Logger logger = Logger.getLogger(UserService.class.getName());
 
     @Override
     public UserDTO registerUser(SignupRequestModel signupRequestModel) {
@@ -123,10 +120,10 @@ public class UserService implements IUserService {
         logger.log(Level.INFO, "Logging User in");
         Authentication authentication = null;
 
-        try{
-             authentication = authenticationManager.authenticate(
+        try {
+            authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        } catch(AuthenticationException ex){
+        } catch (AuthenticationException ex) {
             logger.log(Level.SEVERE, "Authentication failed: no credentials provided");
             throw new AuthException("Invalid Credentials");
         }
@@ -189,6 +186,7 @@ public class UserService implements IUserService {
 
         ModelMapper modelMapper = new ModelMapper();
 
+
         Set<CreateTeamDTO> teams = user.getTeamUsers()
                 .stream()
                 .map(teamUser -> {
@@ -209,7 +207,7 @@ public class UserService implements IUserService {
         }
         ModelMapper modelMapper = new ModelMapper();
 
-        UserDTO result = modelMapper.map(user, UserDTO.class);
+        UserDTO result = modelMapper.map(user.get(), UserDTO.class);
 
         return result;
     }

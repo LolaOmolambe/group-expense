@@ -1,19 +1,16 @@
 package com.expense.tracker.dto;
 
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
-@Getter
-@Setter
-@ToString
+@Data
 @NoArgsConstructor
 public class LoginRequest {
     @NotBlank(message = "Please provide the email address")
-    @Email
+    @Email(message = "Please provide the email address")
     private String email;
 
     @NotBlank(message = "Please provide the password")

@@ -20,21 +20,19 @@ import java.util.logging.Logger;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
 
+    private static final Logger logger = Logger.getLogger(AuthTokenFilter.class.getName());
     @Autowired
     private JwtUtils jwtUtils;
-
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
-
-    private static final Logger logger = Logger.getLogger(AuthTokenFilter.class.getName());
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        try{
+        try {
             String jwt = parseJwt(request);
 
-            if(jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 String email = jwtUtils.getEmailFromJwtToken(jwt);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -45,13 +43,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        }
-        catch(AuthException e) {
+        } catch (AuthException e) {
             logger.log(Level.SEVERE, "Cannot set user authentication: ", e.getMessage());
-            ///throw new AuthException("JWT token is expired");
-        }
-        catch(Exception e) {
+            throw new AuthException("JWT token is expired");
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "Cannot set user authentication: ", e.getMessage());
+            //throw new IOException("Please try again!");
         }
 
         filterChain.doFilter(request, response);
@@ -60,8 +57,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
 
-        if(StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7, headerAuth.length());
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+            return headerAuth.substring(7);
         }
         return null;
     }

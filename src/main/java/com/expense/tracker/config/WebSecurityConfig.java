@@ -65,16 +65,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-//        http.csrf().disable().cors().and()
-//                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-//                .authorizeRequests().antMatchers("/api/v1/auth/**").permitAll()
-//                .antMatchers("/api/v1/test/**").permitAll()
-//                .antMatchers("/tracker", "/v2/api-docs", "/api-docs", "/configuration/**", "/swagger*/**", "/swagger-ui.html",
-//                        "/swagger-ui*/**",  "**/swagger-resources/**", "/com.expense.tracker/swagger-ui/", "/webjars/**").permitAll()
-//                .antMatchers(HttpMethod.DELETE, "/api/v1/group/**").hasRole(RoleType.SuperAdmin.name())
-//                .anyRequest().authenticated();
-
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
