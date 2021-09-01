@@ -143,6 +143,7 @@ public class ControllerExceptionHandler implements ResponseBodyAdvice<Object> {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Object> globalExceptionHandler(Exception ex, WebRequest request) {
+        System.out.println(ex.getClass().getCanonicalName());
         ErrorResponse message = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 new Date(),

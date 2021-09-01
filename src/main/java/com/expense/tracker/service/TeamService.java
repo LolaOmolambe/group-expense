@@ -14,11 +14,7 @@ import com.expense.tracker.repository.UserRepository;
 import com.expense.tracker.service.interfaces.ITeamService;
 import com.expense.tracker.service.interfaces.IUserService;
 import org.modelmapper.ModelMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -33,57 +29,47 @@ import java.util.stream.Collectors;
 @Service
 public class TeamService implements ITeamService {
 
+    private static final Logger logger = Logger.getLogger(TeamService.class.getName());
     @Autowired
     private TeamRepository teamRepository;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private TeamUserRepository teamUserRepository;
-
     @Autowired
     private IUserService userService;
 
-    private static final Logger logger = Logger.getLogger(TeamService.class.getName());
-
     @Override
     @Transactional
-    public CreateTeamDTO createTeam(CreateTeamDTO teamDTO, Principal principal) throws DuplicateEntityException, AuthException {
-        try{
-            logger.log(Level.INFO, "Creating Team Service");
+    public CreateTeamDTO createTeam(CreateTeamDTO teamDTO, Principal principal) {
+        logger.log(Level.INFO, "Creating Team ");
 
-            if (teamRepository.findByName(teamDTO.getTeamName()) != null) {
-                logger.log(Level.SEVERE, "Team already exists.");
-                throw new DuplicateEntityException("Team already exists.");
-            }
-
-            User user = userService.getUser(principal);
-            if (user == null) {
-                logger.log(Level.SEVERE, "Unable to retrieve profile of logged in user.");
-                throw new AuthException("Unable to retrieve profile of logged in user.");
-            }
-            ModelMapper modelMapper = new ModelMapper();
-            Team newTeam = modelMapper.map(teamDTO, Team.class);
-
-            Team storedTeam = teamRepository.save(newTeam);
-
-            TeamUser teamUser = TeamUser.builder().user(user).team(storedTeam).isAdmin(true).build();
-            teamUserRepository.save(teamUser);
-
-            CreateTeamDTO result = modelMapper.map(storedTeam, CreateTeamDTO.class);
-
-            return result;
-        } catch(AuthException ex){
-            throw new AuthException(ex.getMessage());
+        if (teamRepository.findByName(teamDTO.getTeamName()) != null) {
+            logger.log(Level.SEVERE, "Team already exists.");
+            throw new DuplicateEntityException("Team already exists.");
         }
-        catch(DuplicateEntityException ex){
-            throw new DuplicateEntityException(ex.getMessage());
+
+        User user = userService.getUser(principal);
+        if (user == null) {
+            logger.log(Level.SEVERE, "Unable to retrieve profile of logged in user.");
+            throw new AuthException("Unable to retrieve profile of logged in user.");
         }
+
+        Team newTeam = new ModelMapper().map(teamDTO, Team.class);
+
+        Team storedTeam = teamRepository.save(newTeam);
+
+        TeamUser teamUser = TeamUser.builder().user(user).team(storedTeam).isAdmin(true).build();
+        teamUserRepository.save(teamUser);
+
+        CreateTeamDTO result = new ModelMapper().map(storedTeam, CreateTeamDTO.class);
+
+        return result;
+
     }
 
     @Override
-    public CreateTeamDTO getTeamById(Long id) throws ResourceNotFoundException {
+    public CreateTeamDTO getTeamById(Long id) {
         Team team = teamRepository.findById(id).get();
 
         if (team == null) {
@@ -107,60 +93,57 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public Set<TeamUser> addUserToTeam(Long teamId, Long userId, Principal principal) throws ResourceNotFoundException, AuthException, DuplicateEntityException {
-        try{
-            Optional<Team> team = teamRepository.findById(teamId);
+    public void addUserToTeam(Long teamId, Long userId, Principal principal) {
 
-            if (!team.isPresent()) {
-                throw new ResourceNotFoundException("Team does not exist.");
-            }
+        Optional<Team> team = teamRepository.findById(teamId);
 
-            Optional<User> newMember = userRepository.findById(userId);
-
-            if (!newMember.isPresent()) {
-                throw new ResourceNotFoundException("User does not exist");
-            }
-
-            //Get the logged in user
-            User loggedInUser = userService.getUser(principal);
-
-            if (loggedInUser == null) {
-                throw new AuthException("Unable to retrieve profile of logged in user.");
-            }
-
-            //Check if logged in user is in team
-            TeamUser teamUser = teamUserRepository.findByTeamAndUser(teamId, loggedInUser.getId());
-
-            if (teamUser == null) {
-                throw new ResourceNotFoundException("You are not part of this team. You can not add another member");
-            }
-
-            //Check if user is an admin
-            if (!teamUser.getIsAdmin()) {
-                throw new AuthException("Only An Admin of this team can add users");
-            }
-
-            Set<TeamUser> memberDetails = newMember.get().getTeamUsers();
-
-            List<TeamUser> memberTeams = newMember.get().getTeamUsers()
-                    .stream()
-                    .filter(element -> {
-                        return element.getTeam().getId() == team.get().getId();
-                    })
-                    .collect(Collectors.toList());
-
-            if (memberTeams.size() > 0) {
-                throw new DuplicateEntityException("User already in team");
-            }
-
-            TeamUser newTeamUser = TeamUser.builder().user(newMember.get()).team(team.get()).isAdmin(false).build();
-            teamUserRepository.save(newTeamUser);
-
-            return memberDetails;
-
-        } catch(AuthException ex){
-            throw new AuthException(ex.getMessage());
+        if (!team.isPresent()) {
+            throw new ResourceNotFoundException("Team does not exist.");
         }
+
+        Optional<User> newMember = userRepository.findById(userId);
+
+        if (!newMember.isPresent()) {
+            throw new ResourceNotFoundException("User does not exist");
+        }
+
+        //Get the logged in user
+        User loggedInUser = userService.getUser(principal);
+
+        if (loggedInUser == null) {
+            throw new AuthException("Unable to retrieve profile of logged in user.");
+        }
+
+        //Check if logged in user is in team
+        TeamUser teamUser = teamUserRepository.findByTeamAndUser(teamId, loggedInUser.getId());
+
+        if (teamUser == null) {
+            throw new ResourceNotFoundException("You are not part of this team. You can not add another member");
+        }
+
+        //Check if user is an admin
+        if (!teamUser.getIsAdmin()) {
+            throw new AuthException("Only An Admin of this team can add users");
+        }
+
+        Set<TeamUser> memberDetails = newMember.get().getTeamUsers();
+
+        List<TeamUser> memberTeams = memberDetails
+                .stream()
+                .filter(element -> {
+                    return element.getTeam().getId() == team.get().getId();
+                })
+                .collect(Collectors.toList());
+
+        if (memberTeams.size() > 0) {
+            throw new DuplicateEntityException("User already in team");
+        }
+
+        TeamUser newTeamUser = TeamUser.builder().user(newMember.get()).team(team.get()).isAdmin(false).build();
+        teamUserRepository.save(newTeamUser);
+
+
+        //return memberDetails;
 
     }
 
